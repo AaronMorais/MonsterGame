@@ -37,7 +37,7 @@ public class Fight {
             boolean fainted = attackMonster(moveIndex, human, computer);      
             
             if (!fainted) { 
-                moveIndex = 0;
+                moveIndex = (int)(Math.random()*4);
                 attackMonster(moveIndex, computer, human);
             }
             System.out.println("");
@@ -52,10 +52,11 @@ public class Fight {
         Monster attackerMonster = attacker.currentMonster();
         Monster victimMonster = victim.currentMonster();
         
+        System.out.println(attackerMonster.name + " used " + attackerMonster.moveNames[moveIndex]);
+        
         int damage = calculateDamage(moveIndex, attackerMonster, victimMonster) ;
         victimMonster.hp = Math.max(0, victimMonster.hp+damage);
         
-        System.out.println(attackerMonster.name + " used " + attackerMonster.moveNames[moveIndex]);
         if (victimMonster.hp == 0) {
                 System.out.println(victim.name + "'s " + victimMonster.name + " has fainted");
                 victim.currentMonsterIndex++;
@@ -76,23 +77,21 @@ public class Fight {
     
     public int calculateDamage(int moveIndex, Monster attacker, Monster victim) {
         int damage = attacker.moves[moveIndex];
-        System.out.println("Damage: " + damage);
         damage *= (attacker.attack/100) + 1;
-        System.out.println("Damage: " + damage);
         damage *= (1 -((victim.defense/100)/2));
-        System.out.println("Damage: " + damage);
         AttackEffectiveness effectiveness = calculateEffectiveness(attacker.type, victim.type);
         switch(effectiveness) {
             case SUPER_EFFECTIVE:
                 damage *= 2;
+                System.out.println("It's super effective!");
                 break;
             case NEUTRAL:
                 break;
             case NOT_VERY_EFFECTIVE:
                 damage *= 0.5;
+                System.out.println("It's not very effective...");
                 break;
         }
-        System.out.println("Damage: " + damage);
         return damage;
     }
     
