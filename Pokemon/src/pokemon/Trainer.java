@@ -10,11 +10,11 @@ package pokemon;
  */
 public class Trainer {
     Monster[] monsters;
-    int currentMonster=0;
+    int currentMonsterIndex = 0;
     public Trainer(Monster[] m) {
         this.monsters = m;
     }
     public Monster currentMonster() {
-        return this.monsters[this.currentMonster];
+        return this.monsters[this.currentMonsterIndex];
     }
 }
