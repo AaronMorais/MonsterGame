@@ -14,10 +14,10 @@ public class Pokemon {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        Monster[] humanMonsters = new Monster[]{new Monster("pikachu"), new Monster("pikachu"), new Monster("pikachu")};
-        Trainer human = new Trainer(humanMonsters);
-        Monster[] computerMonsters = new Monster[]{new Monster("pikachu"), new Monster("pikachu"), new Monster("pikachu")};
-        Trainer computer = new Trainer(computerMonsters);
+        Monster[] humanMonsters = new Monster[]{new Monster("Charmander"), new Monster("Squirtle"), new Monster("Pikachu")};
+        Trainer human = new Trainer("User", humanMonsters);
+        Monster[] computerMonsters = new Monster[]{new Monster("Bulbasaur"), new Monster("Geodude"), new Monster("Pidgey")};
+        Trainer computer = new Trainer("Computer", computerMonsters);
         Fight fight = new Fight(human, computer);
         fight.start();
     }

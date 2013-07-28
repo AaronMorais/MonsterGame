@@ -5,6 +5,7 @@
 package pokemon;
 
 import java.util.Scanner;
+import pokemon.Monster.MonsterType;
 
 /**
  *
@@ -22,7 +23,7 @@ public class Fight {
         Monster computerMonster = computer.currentMonster();
         Monster humanMonster = human.currentMonster();
         
-        while(true){
+        while(!gameOver()){
             printStatus();
 
             int moveIndex = -1;
@@ -31,52 +32,173 @@ public class Fight {
                 Scanner in = new Scanner(System.in);
                 moveIndex = in.nextInt();
             }
-            moveIndex--;
+            System.out.println("");
+            moveIndex--;                        
+            boolean fainted = attackMonster(moveIndex, human, computer);      
             
-            boolean fainted = attackMonster(moveIndex, humanMonster, computerMonster);
-            System.out.println(humanMonster.name + " used " + humanMonster.moveNames[moveIndex]);
-            if (fainted) {
-                System.out.println(computerMonster.name + " has fainted");
-                computer.currentMonsterIndex++;
-                if (computer.currentMonsterIndex >= computer.monsters.length) {
-                    System.out.println("Computer blacked out. You win!"); 
-                    break;
-                } else {                
-                    computerMonster = computer.currentMonster();
-                    System.out.println("Computer sends out " + computerMonster.name);
-                }
+            if (!fainted) { 
+                moveIndex = 0;
+                attackMonster(moveIndex, computer, human);
             }
-
-            moveIndex = 0;
-            fainted = attackMonster(moveIndex, computerMonster, humanMonster);
-            System.out.println(computerMonster.name + " used " + computerMonster.moveNames[moveIndex]);
-            if (fainted) {
-                System.out.println(humanMonster.name + " has fainted");
-                human.currentMonsterIndex++;
-                if (human.currentMonsterIndex >= human.monsters.length) {
-                    System.out.println("You blacked out. You lose!"); 
-                    break;
-                } else {                
-                    humanMonster = human.currentMonster();
-                    System.out.println("You send out " + humanMonster.name);
-                }
-            }
+            System.out.println("");
         }
     }
     
-    public boolean attackMonster(int move, Monster attacker, Monster victim) {
-        int damage = attacker.moves[move];
-        victim.hp = Math.max(0, victim.hp+damage);
-        return victim.hp == 0;
+    public boolean gameOver() {
+        return ((computer.currentMonsterIndex >= computer.monsters.length) || (human.currentMonsterIndex >= human.monsters.length));
     }
+    
+    public boolean attackMonster(int moveIndex, Trainer attacker, Trainer victim) {
+        Monster attackerMonster = attacker.currentMonster();
+        Monster victimMonster = victim.currentMonster();
+        
+        int damage = calculateDamage(moveIndex, attackerMonster, victimMonster) ;
+        victimMonster.hp = Math.max(0, victimMonster.hp+damage);
+        
+        System.out.println(attackerMonster.name + " used " + attackerMonster.moveNames[moveIndex]);
+        if (victimMonster.hp == 0) {
+                System.out.println(victim.name + "'s " + victimMonster.name + " has fainted");
+                victim.currentMonsterIndex++;
+                if (victim.currentMonsterIndex >= victim.monsters.length) {
+                    System.out.println(victim.name + " blacked out. " + attacker.name + " is the winner!" ); 
+                } else {                
+                    victimMonster = victim.currentMonster();
+                    System.out.println(victim.name + " sends out " + victimMonster.name);
+                }
+                return true;
+        }
+        return false;
+    }
+    
+    public enum AttackEffectiveness {
+        SUPER_EFFECTIVE, NEUTRAL, NOT_VERY_EFFECTIVE
+    }
+    
+    public int calculateDamage(int moveIndex, Monster attacker, Monster victim) {
+        int damage = attacker.moves[moveIndex];
+        System.out.println("Damage: " + damage);
+        damage *= (attacker.attack/100) + 1;
+        System.out.println("Damage: " + damage);
+        damage *= (1 -((victim.defense/100)/2));
+        System.out.println("Damage: " + damage);
+        AttackEffectiveness effectiveness = calculateEffectiveness(attacker.type, victim.type);
+        switch(effectiveness) {
+            case SUPER_EFFECTIVE:
+                damage *= 2;
+                break;
+            case NEUTRAL:
+                break;
+            case NOT_VERY_EFFECTIVE:
+                damage *= 0.5;
+                break;
+        }
+        System.out.println("Damage: " + damage);
+        return damage;
+    }
+    
+    public AttackEffectiveness calculateEffectiveness(MonsterType attacker, MonsterType victim){
+        switch(attacker) {
+            case WATER:
+                switch(victim) {
+                    case WATER:
+                        return AttackEffectiveness.NEUTRAL;
+                    case FIRE:
+                        return AttackEffectiveness.SUPER_EFFECTIVE;
+                    case GRASS:
+                        return AttackEffectiveness.NOT_VERY_EFFECTIVE;
+                    case ELECTRIC:
+                        return AttackEffectiveness.NOT_VERY_EFFECTIVE;
+                    case GROUND:
+                        return AttackEffectiveness.SUPER_EFFECTIVE;
+                    case FLYING:
+                        return AttackEffectiveness.NEUTRAL;
+                }
+            case FIRE:
+                switch(victim) {
+                    case WATER:
+                        return AttackEffectiveness.NOT_VERY_EFFECTIVE;
+                    case FIRE:
+                        return AttackEffectiveness.NEUTRAL;
+                    case GRASS:
+                        return AttackEffectiveness.SUPER_EFFECTIVE;
+                    case ELECTRIC:
+                        return AttackEffectiveness.NEUTRAL;
+                    case GROUND:
+                        return AttackEffectiveness.NOT_VERY_EFFECTIVE;
+                    case FLYING:
+                        return AttackEffectiveness.NEUTRAL;
+                }
+            case GRASS:
+                switch(victim) {
+                    case WATER:
+                        return AttackEffectiveness.SUPER_EFFECTIVE;
+                    case FIRE:
+                        return AttackEffectiveness.NOT_VERY_EFFECTIVE;
+                    case GRASS:
+                        return AttackEffectiveness.NEUTRAL;
+                    case ELECTRIC:
+                        return AttackEffectiveness.NEUTRAL;
+                    case GROUND:
+                        return AttackEffectiveness.SUPER_EFFECTIVE;
+                    case FLYING:
+                        return AttackEffectiveness.NOT_VERY_EFFECTIVE;
+                }
+            case ELECTRIC:
+                switch(victim) {
+                    case WATER:
+                        return AttackEffectiveness.NOT_VERY_EFFECTIVE;
+                    case FIRE:
+                        return AttackEffectiveness.NEUTRAL;
+                    case GRASS:
+                        return AttackEffectiveness.NEUTRAL;
+                    case ELECTRIC:
+                        return AttackEffectiveness.NEUTRAL;
+                    case GROUND:
+                        return AttackEffectiveness.NOT_VERY_EFFECTIVE;
+                    case FLYING:
+                        return AttackEffectiveness.SUPER_EFFECTIVE;
+                }
+            case GROUND:
+                switch(victim) {
+                    case WATER:
+                        return AttackEffectiveness.NOT_VERY_EFFECTIVE;
+                    case FIRE:
+                        return AttackEffectiveness.SUPER_EFFECTIVE;
+                    case GRASS:
+                        return AttackEffectiveness.NOT_VERY_EFFECTIVE;
+                    case ELECTRIC:
+                        return AttackEffectiveness.SUPER_EFFECTIVE;
+                    case GROUND:
+                        return AttackEffectiveness.NEUTRAL;
+                    case FLYING:
+                        return AttackEffectiveness.NEUTRAL;
+                }
+            case FLYING:
+                switch(victim) {
+                    case WATER:
+                        return AttackEffectiveness.NEUTRAL;
+                    case FIRE:
+                        return AttackEffectiveness.NEUTRAL;
+                    case GRASS:
+                        return AttackEffectiveness.SUPER_EFFECTIVE;
+                    case ELECTRIC:
+                        return AttackEffectiveness.NOT_VERY_EFFECTIVE;
+                    case GROUND:
+                        return AttackEffectiveness.NEUTRAL;
+                    case FLYING:
+                        return AttackEffectiveness.NEUTRAL;
+                }          
+        }      
+        return AttackEffectiveness.NEUTRAL;
+   }
     
     public void printStatus() {
         Monster computerMonster = computer.currentMonster();
-        System.out.println(computerMonster.name);
+        System.out.println(computer.name + "'s " + computerMonster.name);
         System.out.println("HP: " + computerMonster.hp );
         System.out.println("vs.");
         Monster humanMonster = human.currentMonster();
-        System.out.println(humanMonster.name);
+        System.out.println(human.name + "'s " + humanMonster.name);
         System.out.println("HP: " + humanMonster.hp);
         System.out.println("Moves: ");
         for(int i=0; i<humanMonster.moves.length; i++) {

@@ -9,10 +9,12 @@ package pokemon;
  * @author Matt
  */
 public class Trainer {
+    String name;
     Monster[] monsters;
     int currentMonsterIndex = 0;
-    public Trainer(Monster[] m) {
-        this.monsters = m;
+    public Trainer(String name, Monster[] monsters) {
+        this.name = name;
+        this.monsters = monsters;
     }
     public Monster currentMonster() {
         return this.monsters[this.currentMonsterIndex];
